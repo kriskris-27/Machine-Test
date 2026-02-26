@@ -1,5 +1,6 @@
 import app from './app';
 import { config } from './config';
+import { connectDB } from './config/db';
 
 process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
@@ -13,8 +14,11 @@ process.on('unhandledRejection', (err: any) => {
     process.exit(1);
 });
 
-const startServer = () => {
+const startServer = async () => {
     try {
+        // Connect to Database
+        await connectDB();
+
         app.listen(config.port, () => {
             console.log(`
 🚀 Server is running!
