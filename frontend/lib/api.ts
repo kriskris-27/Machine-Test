@@ -11,8 +11,13 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
         const token = localStorage.getItem('adminToken');
-        if (token && config.headers) {
-            config.headers.Authorization = `Bearer ${token}`;
+        if (token) {
+            config.headers = config.headers || {};
+            if (typeof config.headers.set === 'function') {
+                config.headers.set('Authorization', `Bearer ${token}`);
+            } else {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
     }
     return config;
@@ -22,11 +27,10 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor for global error handling
 api.interceptors.response.use((response) => response, (error) => {
-    // If 401 Unauthorized, maybe clear token and redirect to login
     if (error.response?.status === 401 && typeof window !== 'undefined') {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminData');
-        // We'll rely on route guards to redirect, but could force window.location.href here if needed.
+        window.location.href = '/login'; // Force redirect to login on 401
     }
     return Promise.reject(error);
 });

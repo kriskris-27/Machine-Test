@@ -10,7 +10,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     const pathname = usePathname();
 
     useEffect(() => {
-        if (!loading && !user && pathname !== '/login') {
+        const publicRoutes = ['/login', '/agent-portal'];
+        if (!loading && !user && !publicRoutes.includes(pathname)) {
             router.push('/login');
         }
     }, [user, loading, router, pathname]);
@@ -24,8 +25,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }
 
     // If not loading and no user, the useEffect will trigger redirect, 
-    // but we shouldn't render children.
-    if (!user && pathname !== '/login') {
+    // but we shouldn't render children unless it's a public route.
+    const publicRoutes = ['/login', '/agent-portal'];
+    if (!user && !publicRoutes.includes(pathname)) {
         return null;
     }
 

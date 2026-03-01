@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import { Users, Plus, Loader2, MoreVertical, RefreshCw } from "lucide-react";
+import { Users, Plus, Loader2, MoreVertical, RefreshCw, Trash2, Eye } from "lucide-react";
 import AddAgentModal from "@/components/AddAgentModal";
 import { useToast } from "@/context/ToastContext";
 
@@ -19,6 +19,7 @@ export default function AgentsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const { showToast } = useToast();
 
     const fetchAgents = async () => {
@@ -36,7 +37,24 @@ export default function AgentsPage() {
 
     useEffect(() => {
         fetchAgents();
+
+        // Close dropdown when clicking outside
+        const handleClickOutside = () => setActiveDropdown(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
     }, []);
+
+    const handleDeleteAgent = async (agentId: string, agentName: string) => {
+        if (!window.confirm(`Are you sure you want to delete ${agentName}?`)) return;
+
+        try {
+            await api.delete(`/agents/${agentId}`); // Assuming you have a delete endpoint, if not this will need backend update too
+            showToast(`Agent ${agentName} deleted successfully.`, "success");
+            fetchAgents();
+        } catch (err: any) {
+            showToast(err.response?.data?.message || "Failed to delete agent.", "error");
+        }
+    };
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -63,7 +81,7 @@ export default function AgentsPage() {
                 </div>
             </div>
 
-            <div className="glass-panel rounded-2xl overflow-hidden border border-white/10 shadow-xl">
+            <div className="glass-panel rounded-2xl overflow-visible border border-white/10 shadow-xl">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24">
                         <Loader2 className="w-10 h-10 text-[var(--color-primary)] animate-spin mb-4" />
@@ -86,22 +104,22 @@ export default function AgentsPage() {
                         <p className="text-[var(--color-text-secondary)] max-w-sm text-center">Get started by adding a new agent to the system so they can receive distributed tasks.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-visible min-h-[12rem]">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-white/10 bg-white/5 text-[var(--color-text-secondary)] text-xs uppercase tracking-wider">
-                                    <th className="p-5 font-semibold">Agent Profile</th>
+                                    <th className="p-5 font-semibold rounded-tl-2xl">Agent Profile</th>
                                     <th className="p-5 font-semibold">Contact Details</th>
                                     <th className="p-5 font-semibold">Date Added</th>
                                     <th className="p-5 font-semibold text-center">Status</th>
-                                    <th className="p-5 font-semibold"></th>
+                                    <th className="p-5 font-semibold rounded-tr-2xl"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {agents.map((agent, index) => (
                                     <tr
                                         key={agent._id}
-                                        className="hover:bg-white/5 transition-colors group animate-in fade-in slide-in-from-bottom-2"
+                                        className={`hover:bg-white/5 transition-colors group animate-in fade-in slide-in-from-bottom-2 ${activeDropdown === agent._id ? 'relative z-50 bg-white/5' : ''}`}
                                         style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
                                     >
                                         <td className="p-5">
@@ -134,10 +152,49 @@ export default function AgentsPage() {
                                                 <span>Active</span>
                                             </span>
                                         </td>
-                                        <td className="p-5 text-right">
-                                            <button className="p-2 text-[var(--color-text-secondary)] hover:text-white rounded-lg hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all focus:opacity-100">
+                                        <td className="p-5 text-right relative">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    e.nativeEvent.stopImmediatePropagation();
+                                                    setActiveDropdown(activeDropdown === agent._id ? null : agent._id);
+                                                }}
+                                                className="p-2 text-[var(--color-text-secondary)] hover:text-white rounded-lg hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
+                                            >
                                                 <MoreVertical className="w-5 h-5" />
                                             </button>
+
+                                            {activeDropdown === agent._id && (
+                                                <div className="absolute right-8 top-10 w-48 bg-[var(--color-surface-dark)] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                                    <div className="p-1">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigator.clipboard.writeText(agent._id);
+                                                                showToast("Agent ID copied to clipboard", "info");
+                                                                setActiveDropdown(null);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2.5 text-sm text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 rounded-lg transition-colors flex items-center"
+                                                        >
+                                                            <Eye className="w-4 h-4 mr-2" />
+                                                            Copy Agent ID
+                                                        </button>
+                                                        <div className="h-px bg-white/10 my-1 mx-2" />
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteAgent(agent._id, agent.name);
+                                                                setActiveDropdown(null);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors flex items-center"
+                                                        >
+                                                            <Trash2 className="w-4 h-4 mr-2" />
+                                                            Delete Agent
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

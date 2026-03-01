@@ -28,6 +28,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
         req.user = currentAdmin;
         next();
     } catch (error) {
+        console.error("JWT Error in protect middleware:", error);
         next(new AppError(401, 'Invalid token. Please log in again.'));
     }
 };

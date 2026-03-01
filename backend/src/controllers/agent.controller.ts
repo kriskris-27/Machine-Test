@@ -61,13 +61,38 @@ export const getAgentTasks = async (req: Request, res: Response, next: NextFunct
         const tasks = await TaskItem.find({
             agentId: new mongoose.Types.ObjectId(agentId)
         } as any).select('-__v');
-
         res.status(200).json({
             status: 'success',
             results: tasks.length,
             data: {
                 tasks
             }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteAgent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const agentId = req.params.id as string;
+
+        if (!agentId || !mongoose.Types.ObjectId.isValid(agentId)) {
+            return next(new AppError(400, 'Invalid Agent ID'));
+        }
+
+        const agent = await Agent.findByIdAndDelete(agentId);
+
+        if (!agent) {
+            return next(new AppError(404, 'No agent found with that ID'));
+        }
+
+        // Optional: also delete all tasks assigned to this agent
+        await TaskItem.deleteMany({ agentId: new mongoose.Types.ObjectId(agentId) } as any);
+
+        res.status(204).json({
+            status: 'success',
+            data: null
         });
     } catch (error) {
         next(error);
