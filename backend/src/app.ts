@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { errorHandler } from './middlewares/error.middleware';
 import authRoutes from './routes/auth.routes';
 import agentRoutes from './routes/agent.routes';
+import uploadRoutes from './routes/upload.routes';
 
 const app: Application = express();
 
@@ -20,6 +21,7 @@ app.use(morgan('dev'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/agents', agentRoutes);
+app.use('/api/upload', uploadRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to the Production API' });
