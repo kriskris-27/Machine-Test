@@ -23,6 +23,9 @@ export const uploadAndDistribute = async (req: Request, res: Response, next: Nex
         // 3. Distribute
         const distributedTasks = distributeTasks(rawTasks, agents);
 
+        // 3.5 Clear old tasks before inserting new ones
+        await TaskItem.deleteMany({});
+
         // 4. Bulk Save
         await TaskItem.insertMany(distributedTasks);
 

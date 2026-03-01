@@ -3,7 +3,8 @@
 import { useState } from "react";
 import api from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
-import { Search, Loader2, User, KeyRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Loader2, User, KeyRound, ArrowLeft } from "lucide-react";
 
 export default function AgentPortal() {
     const [agentId, setAgentId] = useState("");
@@ -11,6 +12,7 @@ export default function AgentPortal() {
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const { showToast } = useToast();
+    const router = useRouter();
 
     const fetchTasks = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,6 +40,13 @@ export default function AgentPortal() {
             <div className="absolute bottom-[20%] right-[10%] w-[40%] h-[30%] bg-purple-600 opacity-10 blur-[150px] pointer-events-none rounded-full" />
 
             <div className="w-full max-w-3xl z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                <button
+                    onClick={() => router.push('/login')}
+                    className="flex items-center text-[var(--color-text-secondary)] hover:text-white transition-colors mb-8 group"
+                >
+                    <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+                    <span className="font-medium">Back to Login</span>
+                </button>
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-primary)] to-blue-700 shadow-xl shadow-blue-500/20 mb-6 transform transition-transform hover:scale-105">
                         <User className="w-10 h-10 text-white" />
