@@ -1,8 +1,8 @@
-import { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 export interface ITaskItem extends Document {
     firstName: string;
     phone: string;
     notes: string;
-    agentId: Schema.Types.ObjectId;
+    agentId: mongoose.Types.ObjectId;
 }

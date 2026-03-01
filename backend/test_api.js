@@ -20,8 +20,8 @@ async function runTests() {
         console.log('\n--- Testing Agent Creation ---');
         const agentRes = await axios.post(`${API_URL}/agents`, {
             name: 'Agent One',
-            email: 'agent1@test.com',
-            mobile: '+911234567890',
+            email: `agent_${Date.now()}@test.com`,
+            mobile: `+919${String(Date.now()).slice(-9)}`,
             password: 'password123'
         }, config);
         console.log('✅ Agent created:', agentRes.data.data.agent.name);
@@ -46,7 +46,28 @@ async function runTests() {
         console.log('Parsed rows:', uploadRes.data.results);
         console.log('First row:', uploadRes.data.data.tasks[0]);
 
-        console.log('\n🎉 All tests passed for Tasks 6-15!');
+        console.log('\n--- Testing Agent-Wise Task Retrieval ---');
+        const tasksRes = await axios.get(`${API_URL}/agents/${agentRes.data.data.agent.id}/tasks`, config);
+        console.log('✅ Tasks found for agent:', tasksRes.data.results);
+
+        console.log('\n--- Testing CSV Distribution ---');
+        const distForm = new FormData();
+        distForm.append('file', fs.createReadStream('test.csv'));
+
+        const distRes = await axios.post(`${API_URL}/upload/distribute`, distForm, {
+            headers: {
+                ...config.headers,
+                ...distForm.getHeaders()
+            }
+        });
+        console.log('✅ CSV Distribution successful');
+        console.log('Message:', distRes.data.message);
+
+        console.log('\n--- Verifying Distributed Tasks ---');
+        const verifyRes = await axios.get(`${API_URL}/agents/${agentRes.data.data.agent.id}/tasks`, config);
+        console.log('✅ Total tasks now assigned to agent:', verifyRes.data.results);
+
+        console.log('\n🎉 All tests passed for Tasks 16-20!');
     } catch (error) {
         console.error('❌ Test failed:');
         if (error.response) {

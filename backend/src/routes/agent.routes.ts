@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAgent, getAllAgents } from '../controllers/agent.controller';
+import { createAgent, getAllAgents, getAgentTasks } from '../controllers/agent.controller';
 import { protect } from '../middlewares/auth.middleware';
 import { agentValidator, validateRequest } from '../middlewares/validator.middleware';
 
@@ -10,5 +10,6 @@ router.use(protect);
 
 router.post('/', agentValidator, validateRequest, createAgent);
 router.get('/', getAllAgents);
+router.get('/:agentId/tasks', getAgentTasks);
 
 export default router;

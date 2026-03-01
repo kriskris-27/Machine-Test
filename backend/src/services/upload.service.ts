@@ -48,3 +48,34 @@ export const parseSpreadsheet = (filePath: string): IParsedTask[] => {
         // fs.unlinkSync(filePath);
     }
 };
+
+export const distributeTasks = (tasks: IParsedTask[], agents: any[]): any[] => {
+    const totalTasks = tasks.length;
+    const totalAgents = agents.length;
+
+    if (totalAgents === 0) return [];
+
+    const baseCount = Math.floor(totalTasks / totalAgents);
+    const remainder = totalTasks % totalAgents;
+
+    let currentIndex = 0;
+    const distributedData: any[] = [];
+
+    agents.forEach((agent, index) => {
+        // First 'remainder' agents get baseCount + 1, others get baseCount
+        const countForThisAgent = index < remainder ? baseCount + 1 : baseCount;
+
+        const agentTasks = tasks.slice(currentIndex, currentIndex + countForThisAgent);
+
+        agentTasks.forEach(task => {
+            distributedData.push({
+                ...task,
+                agentId: agent._id
+            });
+        });
+
+        currentIndex += countForThisAgent;
+    });
+
+    return distributedData;
+};
