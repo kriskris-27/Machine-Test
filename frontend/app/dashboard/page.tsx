@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Users, Plus, Loader2, MoreVertical, RefreshCw } from "lucide-react";
+import AddAgentModal from "@/components/AddAgentModal";
+import { useToast } from "@/context/ToastContext";
 
 interface Agent {
     _id: string;
@@ -16,6 +18,8 @@ export default function AgentsPage() {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { showToast } = useToast();
 
     const fetchAgents = async () => {
         try {
@@ -49,7 +53,10 @@ export default function AgentsPage() {
                     >
                         <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                     </button>
-                    <button className="flex items-center space-x-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95 group">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center space-x-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-95 group"
+                    >
                         <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
                         <span className="font-medium">Add Agent</span>
                     </button>
@@ -139,6 +146,15 @@ export default function AgentsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Modals */}
+            <AddAgentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchAgents}
+                api={api}
+                showToast={showToast}
+            />
         </div>
     );
 }

@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function RootLayout({
@@ -23,11 +24,13 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.variable} antialiased`}>
-                <AuthProvider>
-                    <ProtectedRoute>
-                        {children}
-                    </ProtectedRoute>
-                </AuthProvider>
+                <ToastProvider>
+                    <AuthProvider>
+                        <ProtectedRoute>
+                            {children}
+                        </ProtectedRoute>
+                    </AuthProvider>
+                </ToastProvider>
             </body>
         </html>
     );

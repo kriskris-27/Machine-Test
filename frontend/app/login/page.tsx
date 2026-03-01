@@ -109,6 +109,18 @@ export default function LoginPage() {
                         )}
                     </button>
                 </form>
+
+                <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                        Are you an Agent?{" "}
+                        <button
+                            onClick={() => router.push('/agent-portal')}
+                            className="text-[var(--color-primary)] font-medium hover:text-[var(--color-primary-hover)] transition-colors"
+                        >
+                            Access your portal
+                        </button>
+                    </p>
+                </div>
             </div>
         </div>
     );
