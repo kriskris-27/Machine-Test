@@ -3,7 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { errorHandler } from './middlewares/error.middleware';
-import userRoutes from './routes/user.routes';
+import authRoutes from './routes/auth.routes';
+import agentRoutes from './routes/agent.routes';
 
 const app: Application = express();
 
@@ -17,7 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/agents', agentRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to the Production API' });
